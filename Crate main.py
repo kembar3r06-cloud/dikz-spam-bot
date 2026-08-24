@@ -1,4 +1,3 @@
-cat > main.py << 'EOF'
 #!/usr/bin/env python3
 import os
 import sys
@@ -42,16 +41,14 @@ class DikzSpamTermux:
         return pilihan
     
     def spam_menu(self):
-        """Main spam function"""
         self.clear_screen()
         print("╔════ SPAM OTP ════╗\n")
         
         try:
-            nomor = input("📱 Nomor Target (contoh: 089508226367): ").strip()
+            nomor = input("📱 Nomor Target (089508226367): ").strip()
             
-            # Validasi nomor
             if not nomor.isdigit() or len(nomor) < 10:
-                print("❌ Nomor invalid (min 10 digit)")
+                print("❌ Nomor invalid")
                 time.sleep(2)
                 return
             
@@ -60,12 +57,113 @@ class DikzSpamTermux:
             try:
                 jumlah = int(jumlah)
             except ValueError:
-                print("❌ Jumlah harus angka")
+                print("❌ Harus angka")
                 time.sleep(2)
                 return
             
-            # Confirm
             print(f"""
+╔════════════════════════════════╗
+║    ⚠️  KONFIRMASI SPAM ⚠️      ║
+╠════════════════════════════════╣
+║  Target  : {nomor}
+║  Jumlah  : {jumlah}x
+╚════════════════════════════════╝
+            """)
+            
+            konfirm = input("Lanjut? (y/n): ").strip().lower()
+            if konfirm != 'y':
+                print("❌ Dibatalkan")
+                time.sleep(2)
+                return
+            
+            print("\n🔥 Spam dimulai...\n")
+            result = self.spam.spam_termux(nomor, jumlah, callback=self.progress)
+            
+            print(f"""
+╔════════════════════════════════╗
+║       ✓ SPAM SELESAI ✓        ║
+╠════════════════════════════════╣
+║  Sukses  : {result['success']} request
+║  Gagal   : {result['failed']} request
+║  Total   : {result['success'] + result['failed']}
+╚════════════════════════════════╝
+            """)
+            
+            time.sleep(3)
+        
+        except KeyboardInterrupt:
+            print("\n\n❌ Dibatalkan")
+            time.sleep(2)
+    
+    def progress(self, msg):
+        print(f"  {msg}")
+    
+    def history_menu(self):
+        self.clear_screen()
+        print("╔════ HISTORY ════╗\n")
+        
+        try:
+            with open('logs/history.json', 'r') as f:
+                history = json.load(f)
+                for i, log in enumerate(history[-10:], 1):
+                    print(f"{i}. {log['nomor']} - {log['jumlah']}x - {log['time']}")
+        except FileNotFoundError:
+            print("📭 Belum ada history")
+        
+        input("\nTekan Enter...")
+    
+    def settings_menu(self):
+        self.clear_screen()
+        print("╔════ SETTINGS ════╗\n")
+        print("Coming soon...\n")
+        input("Tekan Enter...")
+    
+    def info_menu(self):
+        self.clear_screen()
+        print("""
+╔═══════════════════════════════════╗
+║         DIKZ SPAM INFO            ║
+╠═══════════════════════════════════╣
+║  Version : 1.0 (Termux)           ║
+║  Author  : King Egi 😈💥        ║
+║  Endpoint: 60+                    ║
+║  Status  : Active                 ║
+║                                   ║
+║  ⚠️  Hanya untuk testing!        ║
+║  Gunakan bertanggung jawab        ║
+║                                   ║
+║  GitHub: github.com/kingegi       ║
+╚═══════════════════════════════════╝
+        """)
+        input("\nTekan Enter...")
+    
+    def run(self):
+        while self.running:
+            pilihan = self.menu()
+            
+            if pilihan == '1':
+                self.spam_menu()
+            elif pilihan == '2':
+                self.history_menu()
+            elif pilihan == '3':
+                self.settings_menu()
+            elif pilihan == '4':
+                self.info_menu()
+            elif pilihan == '5':
+                self.clear_screen()
+                print("👋 Terima kasih, Egi!")
+                sys.exit(0)
+            else:
+                print("❌ Invalid")
+                time.sleep(1)
+
+if __name__ == '__main__':
+    try:
+        bot = DikzSpamTermux()
+        bot.run()
+    except KeyboardInterrupt:
+        print("\n\n❌ Bot ditutup")
+        sys.exit(0)            print(f"""
 ╔════════════════════════════════╗
 ║    ⚠️  KONFIRMASI SPAM ⚠️      ║
 ╠════════════════════════════════╣
